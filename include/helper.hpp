@@ -4,18 +4,17 @@
  *  Created on: 2011. 6. 17.
  *  Modified on: 2013. 10. 1.
  *      Author: Jinhan Lee
-*/
+ */
 
-#ifndef SYSTEM_H_
-#define SYSTEM_H_
+#pragma once
 
-#include <iostream>
-#include <fstream>
-#include <cstdio>
 #include <stdio.h>
-#include <string>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <memory>
+#include <string>
 
 #include <math.h>
 #include <vector>
@@ -32,17 +31,3 @@
 // #include <opencv2/core/internal.hpp>
 
 #include <gflags/gflags.h>
-
-using namespace std;
-using namespace cv;
-
-struct SEGMENT {
-    float x1, y1, x2, y2, angle;
-    int label;
-};
-
-struct Point4f {
-	float x1,y1,x2,y2;
-};
-
-#endif
