@@ -4,26 +4,15 @@
 using namespace std;
 using namespace cv;
 
-
-DECLARE_double(dt);
-DECLARE_int32(lt);
-
 struct SEGMENT {
   float x1, y1, x2, y2, angle;
   int label;
 };
 
-struct Point4f {
-  float x1, y1, x2, y2;
-};
-
 class LineDetector {
  public:
-  LineDetector() {
-    threshold_dist = FLAGS_dt;
-    threshold_length = FLAGS_lt;
-    init_label = 0;
-  }
+  LineDetector(double dt, int lt)
+      : init_label(0), threshold_length(lt), threshold_dist(dt) {}
   ~LineDetector(){};
   template <class tType>
   void incidentPoint(tType* pt, Mat& l);

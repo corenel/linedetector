@@ -11,3 +11,5 @@
 %}
 
 %include "line_detector.hpp"
+
+%template(SegmentVector) std::vector<SEGMENT>;
