@@ -13,14 +13,15 @@ int main(int argc, char* argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
   if (FLAGS_i == "") {
     fprintf(stderr, "Define input file path.\n");
-    std::cout << "Usage: " << argv[0]
-         << " -i /input/file/path.png (optional)-o /output/file/path.txt "
-            "(optional)-dt distance_threshold (optional)-lt length_threshold"
-         << std::endl;
+    std::cout
+        << "Usage: " << argv[0]
+        << " -i /input/file/path.png (optional)-o /output/file/path.txt "
+           "(optional)-dt distance_threshold (optional)-lt length_threshold"
+        << std::endl;
     return 0;
   }
 
-  LineDetector ld(FLAGS_dt, FLAGS_lt);
+  LineDetector ld(FLAGS_lt, float(FLAGS_dt));
   vector<SEGMENT> lines;
   Mat src_old;
   Mat src = imread(FLAGS_i, 1);
@@ -39,22 +40,22 @@ int main(int argc, char* argv[]) {
   auto start = chrono::steady_clock::now();
 
   lines.clear();
-  ld.lineDetection(src_gray, lines);
+  ld.detect(src_gray, lines);
 
   auto end = chrono::steady_clock::now();
   std::cout << "#Segments: " << lines.size() << std::endl;
   std::cout << "Elapsed time in nanoseconds : "
-       << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
-       << " ns" << std::endl;
+            << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
+            << " ns" << std::endl;
   std::cout << "Elapsed time in microseconds : "
-       << chrono::duration_cast<chrono::microseconds>(end - start).count()
-       << " µs" << std::endl;
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " µs" << std::endl;
   std::cout << "Elapsed time in milliseconds : "
-       << chrono::duration_cast<chrono::milliseconds>(end - start).count()
-       << " ms" << std::endl;
+            << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+            << " ms" << std::endl;
   std::cout << "Elapsed time in seconds : "
-       << chrono::duration_cast<chrono::seconds>(end - start).count()
-       << " sec";
+            << chrono::duration_cast<chrono::seconds>(end - start).count()
+            << " sec";
 
   FILE* fptr;
   string outfile;
@@ -89,7 +90,7 @@ int main(int argc, char* argv[]) {
     int g = (seg.label * 24776) % 256;
     int r = (seg.label * 11491) % 256;
 
-    ld.drawArrow(src, &seg, Scalar(b, g, r));
+    ld.draw_arrow(src, &seg, Scalar(b, g, r));
     char cLabel[64];
     sprintf(cLabel, "%d", seg.label);
     Point2i pM;

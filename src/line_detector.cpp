@@ -1,7 +1,7 @@
-#include "../include/line_detector.hpp"
+#include "line_detector.hpp"
 
-void LineDetector::mergeLines(SEGMENT *seg1, SEGMENT *seg2,
-                              SEGMENT *seg_merged) {
+void LineDetector::merge_lines(SEGMENT *Seg1, SEGMENT *Seg2,
+                               SEGMENT *SegMerged) {
   double xg = 0.0, yg = 0.0;
   double delta1x = 0.0, delta1y = 0.0, delta2x = 0.0, delta2y = 0.0;
   float ax = 0, bx = 0, cx = 0, dx = 0;
@@ -11,16 +11,16 @@ void LineDetector::mergeLines(SEGMENT *seg1, SEGMENT *seg2,
   double axg = 0.0, bxg = 0.0, cxg = 0.0, dxg = 0.0, delta1xg = 0.0,
          delta2xg = 0.0;
 
-  ax = seg1->x1;
-  ay = seg1->y1;
+  ax = Seg1->x1;
+  ay = Seg1->y1;
 
-  bx = seg1->x2;
-  by = seg1->y2;
-  cx = seg2->x1;
-  cy = seg2->y1;
+  bx = Seg1->x2;
+  by = Seg1->y2;
+  cx = Seg2->x1;
+  cy = Seg2->y1;
 
-  dx = seg2->x2;
-  dy = seg2->y2;
+  dx = Seg2->x2;
+  dy = Seg2->y2;
 
   float dlix = (bx - ax);
   float dliy = (by - ay);
@@ -69,13 +69,13 @@ void LineDetector::mergeLines(SEGMENT *seg1, SEGMENT *seg2,
   delta2x = delta2xg * cos(thr) + xg;
   delta2y = delta2xg * sin(thr) + yg;
 
-  seg_merged->x1 = (float)delta1x;
-  seg_merged->y1 = (float)delta1y;
-  seg_merged->x2 = (float)delta2x;
-  seg_merged->y2 = (float)delta2y;
+  SegMerged->x1 = (float)delta1x;
+  SegMerged->y1 = (float)delta1y;
+  SegMerged->x2 = (float)delta2x;
+  SegMerged->y2 = (float)delta2y;
 }
 
-double LineDetector::distPointLine(const Mat &p, Mat &l) {
+double LineDetector::dist_point_to_line(const Mat &p, Mat &l) {
   double x, y, w;
 
   x = l.at<double>(0, 0);
@@ -90,8 +90,8 @@ double LineDetector::distPointLine(const Mat &p, Mat &l) {
   return l.dot(p);
 }
 
-bool LineDetector::mergeSegments(SEGMENT *seg1, SEGMENT *seg2,
-                                 SEGMENT *seg_merged) {
+bool LineDetector::merge_segments(SEGMENT *seg1, SEGMENT *seg2,
+                                  SEGMENT *seg_merged) {
   double o[] = {0.0, 0.0, 1.0};
   double a[] = {0.0, 0.0, 1.0};
   double b[] = {0.0, 0.0, 1.0};
@@ -130,12 +130,12 @@ bool LineDetector::mergeSegments(SEGMENT *seg1, SEGMENT *seg2,
   float angdiff = seg1->angle - seg2->angle;
   angdiff = fabs(angdiff);
 
-  double dist = distPointLine(ori, l1);
+  double dist = dist_point_to_line(ori, l1);
 
-  if (fabs(dist) <= threshold_dist * 2.0 &&
+  if (fabs(dist) <= threshold_dist_ * 2.0 &&
       middist <= seg1len / 2.0 + seg2len / 2.0 + 20.0 &&
       angdiff <= CV_PI / 180.0f * 5.0f) {
-    mergeLines(seg1, seg2, seg2);
+    merge_lines(seg1, seg2, seg2);
     return true;
   } else {
     return false;
@@ -143,7 +143,7 @@ bool LineDetector::mergeSegments(SEGMENT *seg1, SEGMENT *seg2,
 }
 
 template <class tType>
-void LineDetector::incidentPoint(tType *pt, Mat &l) {
+void LineDetector::incident_point(tType *pt, Mat &l) {
   double a[] = {(double)pt->x, (double)pt->y, 1.0};
   double b[] = {l.at<double>(0, 0), l.at<double>(1, 0), 0.0};
   double c[3];
@@ -160,18 +160,18 @@ void LineDetector::incidentPoint(tType *pt, Mat &l) {
 
   pt->x = (float)xk.at<double>(0, 0) < 0.0f
               ? 0.0f
-              : (float)xk.at<double>(0, 0) >= (imagewidth - 1.0f)
-                    ? (imagewidth - 1.0f)
+              : (float)xk.at<double>(0, 0) >= (image_width_ - 1.0f)
+                    ? (image_width_ - 1.0f)
                     : (float)xk.at<double>(0, 0);
   pt->y = (float)xk.at<double>(1, 0) < 0.0f
               ? 0.0f
-              : (float)xk.at<double>(1, 0) >= (imageheight - 1.0f)
-                    ? (imageheight - 1.0f)
+              : (float)xk.at<double>(1, 0) >= (image_height_ - 1.0f)
+                    ? (image_height_ - 1.0f)
                     : (float)xk.at<double>(1, 0);
 }
 
-void LineDetector::extractSegments(vector<Point2i> *points,
-                                   vector<SEGMENT> *segments) {
+void LineDetector::extract_segments(vector<Point2i> *points,
+                                    vector<SEGMENT> *segments) {
   bool is_line;
 
   int i, j;
@@ -182,9 +182,9 @@ void LineDetector::extractSegments(vector<Point2i> *points,
 
   int total = points->size();
 
-  for (i = 0; i + threshold_length < total; i++) {
+  for (i = 0; i + threshold_length_ < total; i++) {
     ps = points->at(i);
-    pe = points->at(i + threshold_length);
+    pe = points->at(i + threshold_length_);
 
     double a[] = {(double)ps.x, (double)ps.y, 1};
     double b[] = {(double)pe.x, (double)pe.y, 1};
@@ -201,7 +201,7 @@ void LineDetector::extractSegments(vector<Point2i> *points,
     l_points.clear();
     l_points.push_back(ps);
 
-    for (j = 1; j < threshold_length; j++) {
+    for (j = 1; j < threshold_length_; j++) {
       pt.x = points->at(i + j).x;
       pt.y = points->at(i + j).y;
 
@@ -209,9 +209,9 @@ void LineDetector::extractSegments(vector<Point2i> *points,
       p.at<double>(1, 0) = (double)pt.y;
       p.at<double>(2, 0) = 1.0;
 
-      double dist = distPointLine(p, l);
+      double dist = dist_point_to_line(p, l);
 
-      if (fabs(dist) > threshold_dist) {
+      if (fabs(dist) > threshold_dist_) {
         is_line = false;
         break;
       }
@@ -239,10 +239,10 @@ void LineDetector::extractSegments(vector<Point2i> *points,
 
     l = p1.cross(p2);
 
-    incidentPoint(&ps, l);
+    incident_point(&ps, l);
 
     // Extending line
-    for (j = threshold_length + 1; i + j < total; j++) {
+    for (j = threshold_length_ + 1; i + j < total; j++) {
       pt.x = points->at(i + j).x;
       pt.y = points->at(i + j).y;
 
@@ -250,9 +250,9 @@ void LineDetector::extractSegments(vector<Point2i> *points,
       p.at<double>(1, 0) = (double)pt.y;
       p.at<double>(2, 0) = 1.0;
 
-      double dist = distPointLine(p, l);
+      double dist = dist_point_to_line(p, l);
 
-      if (fabs(dist) > threshold_dist) {
+      if (fabs(dist) > threshold_dist_) {
         j--;
         break;
       }
@@ -281,8 +281,8 @@ void LineDetector::extractSegments(vector<Point2i> *points,
     e2.x = pe.x;
     e2.y = pe.y;
 
-    incidentPoint(&e1, l);
-    incidentPoint(&e2, l);
+    incident_point(&e1, l);
+    incident_point(&e2, l);
     seg.x1 = e1.x;
     seg.y1 = e1.y;
     seg.x2 = e2.x;
@@ -293,15 +293,16 @@ void LineDetector::extractSegments(vector<Point2i> *points,
   }
 }
 
-void LineDetector::pointInboardTest(Mat &src, Point2i *pt) {
+void LineDetector::point_in_board_test(Mat &src, Point2i *pt) {
   pt->x =
       pt->x <= 5.0f ? 5.0f : pt->x >= src.cols - 5.0f ? src.cols - 5.0f : pt->x;
   pt->y =
       pt->y <= 5.0f ? 5.0f : pt->y >= src.rows - 5.0f ? src.rows - 5.0f : pt->y;
 }
 
-bool LineDetector::getPointChain(const Mat &img, const Point pt,
-                                 Point *chained_pt, int &direction, int step) {
+bool LineDetector::get_point_chain(const Mat &img, const Point &pt,
+                                   Point *chained_pt, int &direction,
+                                   int step) {
   int ri, ci;
   int indices[8][2] = {{1, 1},   {1, 0},  {1, -1}, {0, -1},
                        {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
@@ -332,16 +333,15 @@ bool LineDetector::getPointChain(const Mat &img, const Point pt,
   return false;
 }
 
-void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
-                                 bool merge) {
+void LineDetector::detect(Mat &src, vector<SEGMENT> &segments_all, bool merge) {
   int r, c;
-  imageheight = src.rows;
-  imagewidth = src.cols;
+  image_height_ = src.rows;
+  image_width_ = src.cols;
 
   vector<Point2i> points;
   vector<SEGMENT> segments, segments_tmp, segments_tmp2;
   Mat canny = src.clone();
-  Canny(src, canny, 50, 50, 3);
+  Canny(src, canny, canny_thres_1_, canny_thres_2_, canny_ap_);
 
   for (int i = 0; i < src.rows; i++) {
     for (int j = 0; j < src.cols; j++) {
@@ -352,8 +352,8 @@ void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
 
   SEGMENT seg, seg1, seg2;
 
-  for (r = 0; r < imageheight; r++) {
-    for (c = 0; c < imagewidth; c++) {
+  for (r = 0; r < image_height_; r++) {
+    for (c = 0; c < image_width_; c++) {
       // Find seeds - skip for non-seeds
       if (canny.at<unsigned char>(r, c) == 0) continue;
 
@@ -367,18 +367,18 @@ void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
 
       int direction = 0;
       int step = 0;
-      while (getPointChain(canny, pt, &pt, direction, step)) {
+      while (get_point_chain(canny, pt, &pt, direction, step)) {
         points.push_back(pt);
         step++;
         canny.at<unsigned char>(pt.y, pt.x) = 0;
       }
 
-      if (points.size() < (unsigned int)threshold_length + 1) {
+      if (points.size() < (unsigned int)threshold_length_ + 1) {
         points.clear();
         continue;
       }
 
-      extractSegments(&points, &segments);
+      extract_segments(&points, &segments);
 
       if (segments.size() == 0) {
         points.clear();
@@ -388,14 +388,16 @@ void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
         seg = segments.at(i);
         float length = sqrt((seg.x1 - seg.x2) * (seg.x1 - seg.x2) +
                             (seg.y1 - seg.y2) * (seg.y1 - seg.y2));
-        if (length < threshold_length) continue;
-        if ((seg.x1 <= 5.0f && seg.x2 <= 5.0f) ||
-            (seg.y1 <= 5.0f && seg.y2 <= 5.0f) ||
-            (seg.x1 >= imagewidth - 5.0f && seg.x2 >= imagewidth - 5.0f) ||
-            (seg.y1 >= imageheight - 5.0f && seg.y2 >= imageheight - 5.0f))
+        if (length < threshold_length_) continue;
+        if ((seg.x1 <= margin_dist_ && seg.x2 <= margin_dist_) ||
+            (seg.y1 <= margin_dist_ && seg.y2 <= margin_dist_) ||
+            (seg.x1 >= image_width_ - margin_dist_ &&
+             seg.x2 >= image_width_ - margin_dist_) ||
+            (seg.y1 >= image_height_ - margin_dist_ &&
+             seg.y2 >= image_height_ - margin_dist_))
           continue;
 
-        additionalOperationsOnSegments(src, &seg);
+        additional_operations_on_segments(src, &seg);
         if (!merge) {
           segments_all.push_back(seg);
         }
@@ -413,9 +415,9 @@ void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
   while (true) {
     seg1 = segments_tmp[ith];
     seg2 = segments_tmp[jth];
-    is_merged = mergeSegments(&seg1, &seg2, &seg2);
+    is_merged = merge_segments(&seg1, &seg2, &seg2);
     if (is_merged == true) {
-      additionalOperationsOnSegments(src, &seg2);
+      additional_operations_on_segments(src, &seg2);
       vector<SEGMENT>::iterator it = segments_tmp.begin() + ith;
       *it = seg2;
       segments_tmp.erase(segments_tmp.begin() + jth);
@@ -433,7 +435,7 @@ void LineDetector::lineDetection(Mat &src, vector<SEGMENT> &segments_all,
   segments_all = segments_tmp;
 }
 
-void LineDetector::getAngle(SEGMENT *seg) {
+void LineDetector::get_angle(SEGMENT *seg) {
   float dx = (float)(seg->x2 - seg->x1);
   float dy = (float)(seg->y2 - seg->y1);
   double ang = 0.0;
@@ -461,11 +463,11 @@ void LineDetector::getAngle(SEGMENT *seg) {
   seg->angle = (float)ang;
 }
 
-void LineDetector::additionalOperationsOnSegments(Mat &src, SEGMENT *seg) {
+void LineDetector::additional_operations_on_segments(Mat &src, SEGMENT *seg) {
   if (seg->x1 == 0.0f && seg->x2 == 0.0f && seg->y1 == 0.0f && seg->y2 == 0.0f)
     return;
 
-  getAngle(seg);
+  get_angle(seg);
   double ang = (double)seg->angle;
 
   Point2f start = Point2f(seg->x1, seg->y1);
@@ -499,8 +501,8 @@ void LineDetector::additionalOperationsOnSegments(Mat &src, SEGMENT *seg) {
         cvRound(points[i].x - gap * cos(90.0 * CV_PI / 180.0 + ang));
     points_left[i].y =
         cvRound(points[i].y - gap * sin(90.0 * CV_PI / 180.0 + ang));
-    pointInboardTest(src, &points_right[i]);
-    pointInboardTest(src, &points_left[i]);
+    point_in_board_test(src, &points_right[i]);
+    point_in_board_test(src, &points_left[i]);
   }
 
   int iR = 0, iL = 0;
@@ -521,12 +523,12 @@ void LineDetector::additionalOperationsOnSegments(Mat &src, SEGMENT *seg) {
   delete[] points_right;
   delete[] points_left;
 
-  seg->label = init_label++;
+  seg->label = init_label_++;
   return;
 }
 
-void LineDetector::drawArrow(Mat &mat, const SEGMENT *seg, Scalar bgr,
-                             int thickness, bool directed) {
+void LineDetector::draw_arrow(Mat &mat, const SEGMENT *seg, Scalar bgr,
+                              int thickness, bool directed) {
   Point2i p1;
 
   double gap = 10.0;
@@ -535,7 +537,7 @@ void LineDetector::drawArrow(Mat &mat, const SEGMENT *seg, Scalar bgr,
 
   p1.x = round(seg->x2 - gap * cos(arrow_angle * CV_PI / 180.0 + ang));
   p1.y = round(seg->y2 - gap * sin(arrow_angle * CV_PI / 180.0 + ang));
-  pointInboardTest(mat, &p1);
+  point_in_board_test(mat, &p1);
 
   line(mat, Point(round(seg->x1), round(seg->y1)),
        Point(round(seg->x2), round(seg->y2)), bgr, thickness, 1);
