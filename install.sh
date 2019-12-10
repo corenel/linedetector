@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt install -y libgflags-dev swig
+sudo apt install -y libgflags-dev libboost-dev swig
 mkdir build && cd build
 cmake .. -DBUILD_PYTHON_BINDINGS=ON 
 make
